@@ -31,6 +31,7 @@ jobs:
         submodules: recursive
 
     - name: Setup MSVC
+      if: matrix.os == 'windows-2022'
       uses: TheMrMilchmann/setup-msvc-dev@v1
       with:
         arch: x64
