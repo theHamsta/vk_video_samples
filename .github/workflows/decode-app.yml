@@ -10,17 +10,18 @@ jobs:
   build:
     
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest] #, macos-latest]
         build_type: [Debug, Release]
         compiler:
           - {cxx: "g++", c: "gcc"}
           - {cxx: "clang++", c: "clang"}
-        include:
-          - os: windows-2022
-          - build_type: [Debug, Release]
-          - compiler:
-            - {cxx: "cl", c: "cl"}
+        #include:
+          #- os: windows-2022
+          #- build_type: [Debug, Release]
+          #- compiler:
+            #- {cxx: "cl", c: "cl"}
 
     name: Build vk_video_decoder
     runs-on: ${{ matrix.os }}
