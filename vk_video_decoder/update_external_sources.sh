@@ -84,7 +84,7 @@ function build_shaderc () {
    cd "${BASEDIR}"/shaderc
    mkdir -p build
    cd build
-   cmake -DSHADERC_SKIP_TESTS=ON -DSHADERC_SPIRV_TOOLS_DIR=${BASEDIR}/glslang/External/spirv-tools -DSHADERC_SPIRV_HEADERS_DIR=${BASEDIR}/glslang/External/spirv-tools/external/spirv-headers -DSHADERC_GLSLANG_DIR=${BASEDIR}/glslang -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install .. -G Ninja
+   cmake -DSHADERC_SKIP_TESTS=ON -DSHADERC_SPIRV_TOOLS_DIR=${BASEDIR}/glslang/External/spirv-tools -DSHADERC_SPIRV_HEADERS_DIR=${BASEDIR}/glslang/External/spirv-tools/external/spirv-headers -DSHADERC_GLSLANG_DIR=${BASEDIR}/glslang -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install ..
    ninja -C . -j $CORE_COUNT
    ninja -C . install
    # make -j $CORE_COUNT
