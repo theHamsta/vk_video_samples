@@ -8,7 +8,6 @@ defaults:
 on: [push, pull_request]
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
     
     strategy:
       matrix:
@@ -17,12 +16,14 @@ jobs:
         compiler:
           - {cxx: "g++", c: "gcc"}
           - {cxx: "clang++", c: "clang"}
-        #include:
-          #- os: windows-2022
-          #- build_type: [Debug, Release]
-          #- compiler:
-            #- {cxx: "cl", c: "cl"}
+        include:
+          - os: windows-2022
+          - build_type: [Debug, Release]
+          - compiler:
+            - {cxx: "cl", c: "cl"}
 
+    name: Build vk_video_decoder
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -34,7 +35,7 @@ jobs:
         arch: x64
 
     - name: Setup dependencies
-      run: 
+      run: ./vk_video_decoder/scripts/setup-github-ci-${{matrix.os}}.sh
 
     - name: Configure CMake
       run: cmake -S vk_video_decoder -B ${{github.workspace}}/build
