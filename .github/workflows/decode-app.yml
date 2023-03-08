@@ -1,0 +1,46 @@
+name: vk_video_decoder
+
+# Bash even on Windows!
+defaults:
+  run:
+    shell: bash
+
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest] #, macos-latest]
+        build_type: [Debug, Release]
+        compiler:
+          - {cxx: "g++", c: "gcc"}
+          - {cxx: "clang++", c: "clang"}
+        #include:
+          #- os: windows-2022
+          #- build_type: [Debug, Release]
+          #- compiler:
+            #- {cxx: "cl", c: "cl"}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup MSVC
+      uses: TheMrMilchmann/setup-msvc-dev@v1
+      with:
+        arch: x64
+
+    - name: Setup dependencies
+      run: 
+
+    - name: Configure CMake
+      run: cmake -S vk_video_decoder -B ${{github.workspace}}/build
+            -DCMAKE_CXX_COMPILER=${{matrix.compiler.cxx}}
+            -DCMAKE_C_COMPILER=${{matrix.compiler.c}}
+            -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --parallel
