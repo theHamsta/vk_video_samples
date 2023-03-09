@@ -30,7 +30,7 @@ jobs:
 
     - name: Setup MSVC
       if: matrix.os == 'windows-2022'
-      uses: TheMrMilchmann/setup-msvc-dev@v1
+      uses: TheMrMilchmann/setup-msvc-dev@v2
       with:
         arch: x64
 
@@ -38,10 +38,10 @@ jobs:
       run: ./vk_video_decoder/scripts/setup-github-ci-${{matrix.os}}.sh
 
     - name: Configure CMake
-      run: cmake -S vk_video_decoder -B ${{github.workspace}}/build
+      run: cmake -S vk_video_decoder -B build
             -DCMAKE_CXX_COMPILER=${{matrix.compiler.cxx}}
             -DCMAKE_C_COMPILER=${{matrix.compiler.c}}
             -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --parallel
+      run: cmake --build build --parallel
