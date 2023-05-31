@@ -21,6 +21,7 @@
 #include <iostream>
 #include "VkCodecUtils/VulkanDeviceContext.h"
 #include "VkCodecUtils/VulkanDeviceMemoryImpl.h"
+#include "VkVideoCore/VkVideoCoreProfile.h"
 #include "vkvideo_parser/VulkanBitstreamBuffer.h"
 
 class VulkanBitstreamBufferImpl : public VulkanBitstreamBuffer
@@ -30,7 +31,7 @@ public:
     static VkResult Create(const VulkanDeviceContext* vkDevCtx, uint32_t queueFamilyIndex,
              VkDeviceSize bufferSize, VkDeviceSize bufferOffsetAlignment, VkDeviceSize bufferSizeAlignment,
              const void* pInitializeBufferMemory, VkDeviceSize initializeBufferMemorySize,
-             VkSharedBaseObj<VulkanBitstreamBufferImpl>& vulkanBitstreamBuffer);
+             VkSharedBaseObj<VulkanBitstreamBufferImpl>& vulkanBitstreamBuffer, const VkVideoCoreProfile& videoProfile);
 
     virtual int32_t AddRef()
     {
@@ -100,7 +101,8 @@ private:
                                  VkMemoryPropertyFlags& memoryPropertyFlags,
                                  const void* pInitializeBufferMemory,
                                  VkDeviceSize initializeBufferMemorySize,
-                                 VkSharedBaseObj<VulkanDeviceMemoryImpl>& vulkanDeviceMemory);
+                                 VkSharedBaseObj<VulkanDeviceMemoryImpl>& vulkanDeviceMemory,
+                                 const VkVideoCoreProfile& videoProfile);
 
     uint8_t* CheckAccess(VkDeviceSize offset, VkDeviceSize size) const;
 
@@ -109,7 +111,8 @@ private:
     VulkanBitstreamBufferImpl(const VulkanDeviceContext* vkDevCtx,
                               uint32_t m_queueFamilyIndex,
                               VkDeviceSize bufferOffsetAlignment,
-                              VkDeviceSize bufferSizeAlignment)
+                              VkDeviceSize bufferSizeAlignment,
+                              const VkVideoCoreProfile& videoProfile)
         : VulkanBitstreamBuffer()
         , m_refCount(0)
         , m_vkDevCtx(vkDevCtx)
@@ -121,7 +124,8 @@ private:
         , m_bufferOffsetAlignment(bufferOffsetAlignment)
         , m_bufferSizeAlignment(bufferSizeAlignment)
         , m_vulkanDeviceMemory()
-        , m_streamMarkers(256) { }
+        , m_streamMarkers(256)
+        , m_videoProfile(videoProfile){ }
 
     void Deinitialize();
 
@@ -139,6 +143,7 @@ private:
     VkDeviceSize               m_bufferSizeAlignment;
     VkSharedBaseObj<VulkanDeviceMemoryImpl> m_vulkanDeviceMemory;
     std::vector<uint32_t>      m_streamMarkers;
+    VkVideoCoreProfile         m_videoProfile;
 };
 
 #endif /* _VULKANBISTREAMBUFFERIMPL_H_ */

@@ -292,7 +292,7 @@ int32_t VkVideoDecoder::StartVideoSequence(VkParserDetectedVideoFormat* pVideoFo
                     allocSize,
                     videoCapabilities.minBitstreamBufferOffsetAlignment,
                     videoCapabilities.minBitstreamBufferSizeAlignment,
-                    nullptr, 0, bitstreamBuffer);
+                    nullptr, 0, bitstreamBuffer, videoProfile);
             assert(result == VK_SUCCESS);
             if (result != VK_SUCCESS) {
                 fprintf(stderr, "\nERROR: VulkanBitstreamBufferImpl::Create() result: 0x%x\n", result);
@@ -923,10 +923,13 @@ VkDeviceSize VkVideoDecoder::GetBitstreamBuffer(VkDeviceSize size,
     }
     if (!(availablePoolNode >= 0)) {
         VkResult result = VulkanBitstreamBufferImpl::Create(m_vkDevCtx,
-                m_vkDevCtx->GetVideoDecodeQueueFamilyIdx(),
-                newSize, minBitstreamBufferOffsetAlignment,
-                minBitstreamBufferSizeAlignment,
-                pInitializeBufferMemory, initializeBufferMemorySize, newBitstreamBuffer);
+                                                            m_vkDevCtx->GetVideoDecodeQueueFamilyIdx(),
+                                                            newSize, minBitstreamBufferOffsetAlignment,
+                                                            minBitstreamBufferSizeAlignment,
+                                                            pInitializeBufferMemory,
+                                                            initializeBufferMemorySize,
+                                                            newBitstreamBuffer,
+                                                            m_videoSession->GetVideoProfile());
         assert(result == VK_SUCCESS);
         if (result != VK_SUCCESS) {
             fprintf(stderr, "\nERROR: VulkanBitstreamBufferImpl::Create() result: 0x%x\n", result);

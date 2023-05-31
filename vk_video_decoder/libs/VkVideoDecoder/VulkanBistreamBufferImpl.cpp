@@ -17,17 +17,19 @@
 #include <string.h>
 #include "VkVideoDecoder/VulkanBistreamBufferImpl.h"
 #include "VkCodecUtils/Helpers.h"
+#include "VkVideoCore/VkVideoCoreProfile.h"
 
 VkResult
 VulkanBitstreamBufferImpl::Create(const VulkanDeviceContext* vkDevCtx, uint32_t queueFamilyIndex,
         VkDeviceSize bufferSize, VkDeviceSize bufferOffsetAlignment, VkDeviceSize bufferSizeAlignment,
         const void* pInitializeBufferMemory, VkDeviceSize initializeBufferMemorySize,
-        VkSharedBaseObj<VulkanBitstreamBufferImpl>& vulkanBitstreamBuffer)
+        VkSharedBaseObj<VulkanBitstreamBufferImpl>& vulkanBitstreamBuffer, const VkVideoCoreProfile& videoProfile)
 {
     VkSharedBaseObj<VulkanBitstreamBufferImpl> vkBitstreamBuffer(new VulkanBitstreamBufferImpl(vkDevCtx,
-                                                                      queueFamilyIndex,
-                                                                      bufferOffsetAlignment,
-                                                                      bufferSizeAlignment));
+                                                                                               queueFamilyIndex,
+                                                                                               bufferOffsetAlignment,
+                                                                                               bufferSizeAlignment, 
+                                                                                               videoProfile));
     if (!vkBitstreamBuffer) {
         assert(!"Out of host memory!");
         return VK_ERROR_OUT_OF_HOST_MEMORY;
@@ -54,11 +56,17 @@ VkResult VulkanBitstreamBufferImpl::CreateBuffer(const VulkanDeviceContext* vkDe
                                                  VkMemoryPropertyFlags& memoryPropertyFlags,
                                                  const void* pInitializeBufferMemory,
                                                  VkDeviceSize initializeBufferMemorySize,
-                                                 VkSharedBaseObj<VulkanDeviceMemoryImpl>& vulkanDeviceMemory)
+                                                 VkSharedBaseObj<VulkanDeviceMemoryImpl>& vulkanDeviceMemory,
+                                                 const VkVideoCoreProfile& videoProfile) 
 {
     bufferSize = ((bufferSize + (bufferSizeAlignment - 1)) & ~(bufferSizeAlignment - 1));
     bufferOffset = 0;
 
+    VkVideoProfileListInfoKHR profiles = {};
+    profiles.sType = VK_STRUCTURE_TYPE_VIDEO_PROFILE_LIST_INFO_KHR;
+    profiles.pProfiles = videoProfile.GetProfile();
+    profiles.profileCount = 1;
+    
     // Create the buffer
     VkBufferCreateInfo createBufferInfo = VkBufferCreateInfo();
     createBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -68,6 +76,7 @@ VkResult VulkanBitstreamBufferImpl::CreateBuffer(const VulkanDeviceContext* vkDe
     createBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createBufferInfo.queueFamilyIndexCount = 1;
     createBufferInfo.pQueueFamilyIndices = &queueFamilyIndex;
+    createBufferInfo.pNext = &profiles;
 
     VkResult result = vkDevCtx->CreateBuffer(*vkDevCtx, &createBufferInfo, nullptr, &buffer);
     if (result != VK_SUCCESS) {
@@ -138,7 +147,8 @@ VkResult VulkanBitstreamBufferImpl::Initialize(VkDeviceSize bufferSize,
                                    m_memoryPropertyFlags,
                                    pInitializeBufferMemory,
                                    initializeBufferMemorySize,
-                                   m_vulkanDeviceMemory);
+                                   m_vulkanDeviceMemory,
+                                   m_videoProfile);
 
     if (result != VK_SUCCESS) {
         assert(!"Create new buffer failed!");
@@ -224,7 +234,8 @@ VkDeviceSize VulkanBitstreamBufferImpl::Resize(VkDeviceSize newSize, VkDeviceSiz
                                    newMemoryPropertyFlags,
                                    pInitializeBufferMemory,
                                    copySize,
-                                   newDeviceMemory);
+                                   newDeviceMemory,
+                                   m_videoProfile);
 
     if (result != VK_SUCCESS) {
         assert(!"CreateBuffer failed!");

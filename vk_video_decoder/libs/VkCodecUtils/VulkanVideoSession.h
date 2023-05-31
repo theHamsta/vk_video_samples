@@ -17,6 +17,7 @@
 #pragma once
 
 #include <atomic>
+#include "VkVideoCore/VkVideoCoreProfile.h"
 #include "VkVideoCore/VkVideoRefCountBase.h"
 #include "VkCodecUtils/VulkanDeviceContext.h"
 #include "VkCodecUtils/VulkanVideoUtils.h" // for DeviceMemoryObject
@@ -100,6 +101,7 @@ public:
     }
 
     VkVideoSessionKHR GetVideoSession() const { return m_videoSession; }
+    inline const VkVideoCoreProfile& GetVideoProfile() const { return m_profile; }
 
 private:
 
