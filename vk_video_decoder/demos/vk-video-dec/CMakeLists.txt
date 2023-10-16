@@ -95,11 +95,12 @@ if(WIN32)
     list(APPEND libraries PRIVATE ${AVCODEC_LIB} ${AVFORMAT_LIB} ${AVUTIL_LIB} ${VULKAN_VIDEO_PARSER_LIB} ${GLSLANG_LIBRARIES})
 else()
     list(APPEND libraries PRIVATE -lX11)
-    list(APPEND libraries PRIVATE -lavcodec -lavutil -lavformat)
+    #list(APPEND libraries PRIVATE -lavcodec -lavutil -lavformat)
     list(APPEND libraries PRIVATE -L${SHADERC_SEARCH_PATH} -lshaderc_shared)
     list(APPEND libraries PRIVATE -L${CMAKE_INSTALL_LIBDIR} -l${VULKAN_VIDEO_PARSER_LIB})
     list(APPEND libraries PRIVATE -L${LIBNVPARSER_BINARY_ROOT} -l${VULKAN_VIDEO_PARSER_LIB})
 endif()
+
 
 if(DEFINED ENV{TEGRA_TOP})
     # For the Tegra parser: NvRmChipGetCapabilityU32
@@ -154,9 +155,22 @@ list(APPEND includes PRIVATE ${VULKAN_VIDEO_APIS_INCLUDE}/nvidia_utils/vulkan)
 list(APPEND includes PRIVATE ${SHADERC_ROOT_PATH}/install/include)
 
 add_executable(vk-video-dec-test ${generate_helper_files} ${sources})
-target_compile_definitions(vk-video-dec-test ${definitions})
-target_include_directories(vk-video-dec-test ${includes})
-target_link_libraries(vk-video-dec-test ${libraries})
+target_compile_definitions(vk-video-dec-test PRIAVTE ${definitions})
+target_include_directories(vk-video-dec-test PRIAVTE ${includes})
+target_link_libraries(vk-video-dec-test PRIVATE ${libraries})
 add_dependencies(vk-video-dec-test generate_helper_files)
+find_package(PkgConfig REQUIRED)
+if(PKG_CONFIG_FOUND AND (NOT WIN32)) # pkgconfig works on Windows, but can not handle runtime dependencies
+    pkg_check_modules(
+        LIBAV
+        REQUIRED
+        IMPORTED_TARGET
+        libavformat
+        libavcodec
+        libavutil
+    )
+    target_link_libraries(vk-video-dec-test PRIVATE PkgConfig::LIBAV)
+endif()
+
 
 install(TARGETS vk-video-dec-test RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
